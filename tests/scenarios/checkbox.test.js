@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { classes } from '../../index.js'
+import { classModes } from '../../index.js'
 
 /* 
 Scenario:
@@ -12,7 +12,7 @@ parameter called `givens`.
 
 test('checkbox scenario', () => {
   const givens = 'g'
-  const c = classes({
+  const c = classModes({
     givens,
     base: 'b1 b2',
     disabled: {

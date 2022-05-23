@@ -5,6 +5,8 @@ ClassModes is a multi-modal classnames management utility with a simple interfac
 Put simply: it helps you manage classnames.
 
 ```js
+import {classModes} from 'classModes'
+
 const c = classModes({
   base: 'b1 b2',
   disabled: {

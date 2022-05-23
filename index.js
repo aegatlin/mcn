@@ -1,4 +1,4 @@
-export const classes = (classModes) => (modes) => getClasses(classModes, modes);
+export const classModes = (classModes) => (modes) => getClasses(classModes, modes);
 function getClasses(classModes, modes) {
     const modeKeys = Object.keys(classModes);
     let classes = new Set();
