@@ -19,7 +19,7 @@ function getClasses(classModes: ClassModes, modes: Modes) {
   const modeKeys = Object.keys(classModes)
 
   let classes = new Set<string>()
-  modeKeys.forEach((modeKey) => {
+  modeKeys.forEach(modeKey => {
     const classMode = classModes[modeKey]
     if (typeof classMode == 'string') {
       add(classes, classMode)
@@ -38,6 +38,6 @@ function getClasses(classModes: ClassModes, modes: Modes) {
 function add(set: Set<string>, classes: string) {
   classes
     .split(' ')
-    .map((c) => c.trim())
-    .forEach((c) => set.add(c))
+    .map(c => c.trim())
+    .forEach(c => set.add(c))
 }

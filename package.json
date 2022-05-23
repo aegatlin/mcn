@@ -1,20 +1,27 @@
 {
-  "name": "clxss",
+  "name": "tarquin",
   "version": "0.0.1",
   "main": "index.js",
   "type": "module",
   "prettier": {
     "semi": false,
-    "singleQuote": true
+    "singleQuote": true,
+    "arrowParens": "avoid"
   },
   "scripts": {
+    "prepare": "skooh",
     "build": "tsc",
     "watch": "tsc --watch",
-    "test": "node --test"
+    "test": "node --test",
+    "format": "prettier --write index.ts tests"
+  },
+  "hooks": {
+    "pre-commit": "npm run format && npm run test"
   },
   "devDependencies": {
     "@types/node": "^17.0.35",
     "prettier": "^2.6.2",
+    "skooh": "^0.2.0",
     "typescript": "^4.6.4"
   }
 }
