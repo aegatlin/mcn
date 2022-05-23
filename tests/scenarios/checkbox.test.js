@@ -1,47 +1,42 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { Clxss } from '../../index.js'
+import { classes } from '../../index.js'
+
 /* 
-You want to style a checkbox based on disabled boolean, checked boolean, and a 
-3-nary of size of small, medium, large. Lastly, it is provided a classes string.
+Scenario:
+
+Style a checkbox based on disabled boolean, checked boolean, and a 
+3-nary of size of small, medium, large. Lastly, it is provided classes via a 
+parameter called `givens`.
 */
 
 test('checkbox scenario', () => {
-  const givenClasses = 'g1 g2 g3'
-  const baseClasses = 'b1 b2 b3'
-  const disabledMode = {
+  const givens = 'g'
+  const c = classes({
+    givens,
+    base: 'b1 b2',
     disabled: {
-      true: 'dt1 dt2',
-      false: 'df1 df2',
+      true: 'dt',
+      false: 'df',
     },
-  }
-  const checkedMode = {
     checked: {
-      true: 'ct1 ct2',
-      false: 'cf1 cf2',
+      true: 'ct',
+      false: 'cf',
     },
-  }
-  const sizeMode = {
     size: {
-      small: 'ss1 ss2',
-      medium: 'sm1 sm2',
-      large: 'sl1 sl2',
+      small: 'ss',
+      medium: 'sm',
+      large: 'sl',
     },
-  }
-
-  const classes = Clxss.base(baseClasses, givenClasses).modes({
-    ...disabledMode,
-    ...checkedMode,
-    ...sizeMode,
   })
 
-  const state1 = { disabled: true, checked: false, size: 'large' }
-  const expectedClasses1 = 'g1 g2 g3 b1 b2 b3 dt1 dt2 cf1 cf2 sl1 sl2'
-  assert(matchingClasses(classes.put(state1), expectedClasses1))
-})
+  assert.equal(
+    c({ disabled: true, checked: false, size: 'large' }),
+    'g b1 b2 dt cf sl'
+  )
 
-function matchingClasses(c1, c2) {
-  const a1 = c1.split(' ')
-  const a2 = c2.split(' ')
-  return a1.every((e1) => a2.some((e2) => e1 == e2))
-}
+  assert.equal(
+    c({ disabled: false, checked: true, size: 'small' }),
+    'g b1 b2 df ct ss'
+  )
+})

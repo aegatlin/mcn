@@ -1,69 +1,43 @@
-interface Modes {
-  [modeName: string]: any
+type Modality = any
+
+export interface Modes {
+  [modeName: string]: Modality
 }
 
 interface ClassMode {
-  default?: string
   [modality: string]: string
 }
 
-interface ClassModes {
-  [modeName: string]: ClassMode
+export interface ClassModes {
+  [modeName: string]: ClassMode | string
 }
 
-export class Clxss {
-  #base: Set<string> = new Set<string>()
-  #classModes: ClassModes = {}
+export const classes = (classModes: ClassModes) => (modes?: Modes) =>
+  getClasses(classModes, modes)
 
-  static base(...args: string[]): Clxss {
-    return new Clxss(...args)
-  }
+function getClasses(classModes: ClassModes, modes: Modes) {
+  const modeKeys = Object.keys(classModes)
 
-  constructor(...baseClasses: string[]) {
-    baseClasses.forEach((c) => this.add(c))
-  }
-
-  modes(classModes: ClassModes): Clxss {
-    Object.assign(this.#classModes, classModes)
-    return this
-  }
-
-  mode(classModeName: string, classMode: ClassMode): Clxss {
-    this.#classModes[classModeName] = classMode
-    return this
-  }
-
-  put(modes?: Modes): string {
-    return [
-      ...Array.from(this.#base),
-      ...Array.from(this.#setFrom(modes ?? {})),
-    ].join(' ')
-  }
-
-  add(classes: string, set: Set<string> = this.#base): Clxss {
-    classes
-      .split(' ')
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0)
-      .forEach((s) => set.add(s))
-
-    return this
-  }
-
-  #setFrom(modes: Modes): Set<string> {
-    const modesSet = new Set<string>()
-
-    Object.keys(this.#classModes).forEach((_classModeName) => {
-      const classMode = this.#classModes[_classModeName]
-      const mode = modes[_classModeName]
-      const modeString = `${mode}`
-      if (modeString != 'undefined') {
-        this.add(classMode[modeString], modesSet)
-      } else {
-        classMode.default && this.add(classMode.default, modesSet)
+  let classes = new Set<string>()
+  modeKeys.forEach((modeKey) => {
+    const classMode = classModes[modeKey]
+    if (typeof classMode == 'string') {
+      add(classes, classMode)
+    } else {
+      const modality = modes[modeKey]
+      const modalityString = `${modality}`
+      if (modalityString != 'undefined') {
+        add(classes, classMode[modalityString])
       }
-    })
+    }
+  })
 
-    return modesSet
-  }
+  return Array.from(classes.values()).join(' ')
+}
+
+function add(set: Set<string>, classes: string) {
+  classes
+    .split(' ')
+    .map((c) => c.trim())
+    .forEach((c) => set.add(c))
 }
