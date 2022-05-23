@@ -22,3 +22,10 @@ test('creates components with exceedingly minimal styles', () => {
   assert.equal(c({ disabled: false }), 'f')
   assert.equal(c({ disabled: true }), '')
 })
+
+test('creates components with functionally-defined classes', () => {
+  const a = tarquin({ default: 'a', disabled: { true: 'at', false: 'af' } })
+  const b = tarquin({ a, base: 'b', disabled: { true: 'bt', false: 'bf' } })
+  assert.equal(b({ disabled: true }), 'a at b bt')
+  assert.equal(b({ disabled: false }), 'a af b bf')
+})
