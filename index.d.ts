@@ -8,5 +8,5 @@ interface ClassMode {
 export interface ClassModes {
     [modeName: string]: ClassMode | string;
 }
-export declare const classModes: (classModes: ClassModes) => (modes?: Modes) => string;
+export declare const tarquin: (classModes: ClassModes) => (modes?: Modes) => string;
 export {};

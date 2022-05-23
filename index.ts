@@ -12,7 +12,7 @@ export interface ClassModes {
   [modeName: string]: ClassMode | string
 }
 
-export const classModes = (classModes: ClassModes) => (modes?: Modes) =>
+export const tarquin = (classModes: ClassModes) => (modes?: Modes) =>
   getClasses(classModes, modes)
 
 function getClasses(classModes: ClassModes, modes: Modes) {

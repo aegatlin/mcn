@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { classModes } from '../../index.js'
+import { tarquin } from '../../index.js'
 
 /* 
 Scenario:
@@ -12,7 +12,7 @@ parameter called `givens`.
 
 test('checkbox scenario', () => {
   const givens = 'g'
-  const c = classModes({
+  const c = tarquin({
     givens,
     base: 'b1 b2',
     disabled: {

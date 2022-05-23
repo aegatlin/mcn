@@ -1,8 +1,8 @@
-export const classModes = (classModes) => (modes) => getClasses(classModes, modes);
+export const tarquin = (classModes) => (modes) => getClasses(classModes, modes);
 function getClasses(classModes, modes) {
     const modeKeys = Object.keys(classModes);
     let classes = new Set();
-    modeKeys.forEach((modeKey) => {
+    modeKeys.forEach(modeKey => {
         const classMode = classModes[modeKey];
         if (typeof classMode == 'string') {
             add(classes, classMode);
@@ -20,6 +20,6 @@ function getClasses(classModes, modes) {
 function add(set, classes) {
     classes
         .split(' ')
-        .map((c) => c.trim())
-        .forEach((c) => set.add(c));
+        .map(c => c.trim())
+        .forEach(c => set.add(c));
 }

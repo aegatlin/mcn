@@ -1,13 +1,13 @@
-# ClassModes
+# Tarquin
 
-ClassModes is a multi-modal classnames management utility with a simple interface. 
+Tarquin is a multi-modal classnames management utility with a simple interface.
 
 Put simply: it helps you manage classnames.
 
 ```js
-import {classModes} from 'classModes'
+import { tarquin } from 'tarquin'
 
-const c = classModes({
+const c = tarquin({
   base: 'b1 b2',
   disabled: {
     true: 'dt',
@@ -40,14 +40,9 @@ Each class has an arbitrary number of modes, and each mode has an arbitrary numb
 The ClassModes object will treat any top-level string as a base class, so you can pass in parameterized classes however you'd like.
 
 ```ts
-import { classModes } from 'classmodes'
-
-const myComponent = (
-  parameterClasses: string = 'p',
-  disabled: boolean = false
-) => {
-  const c = classModes({
-    parameterClasses,
+const myComponent = (paramClasses = 'p', disabled = false) => {
+  const c = tarquin({
+    paramClasses,
     base: 'b',
     disabled: {
       true: 't',
@@ -63,7 +58,7 @@ This behavior also allows for nested complexity
 
 ```ts
 const l1 = (disabled: boolean = false) => {
-  const c = classModes({
+  const c = tarquin({
     base: 'b1',
     disabled: {
       true: 't',
@@ -75,7 +70,7 @@ const l1 = (disabled: boolean = false) => {
 }
 
 const l2 = (additionalClasses: string, size: string = 'large') => {
-  const c = classModes({
+  const c = tarquin({
     additionalClasses,
     base: 'b2'
     size: {
