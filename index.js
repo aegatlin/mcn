@@ -10,7 +10,7 @@ function getClasses(classModes, modes) {
         else {
             const modality = modes[modeKey];
             const modalityString = `${modality}`;
-            if (modalityString != 'undefined') {
+            if (modalityString != 'undefined' && classMode[modalityString]) {
                 add(classes, classMode[modalityString]);
             }
         }
