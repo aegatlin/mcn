@@ -29,3 +29,17 @@ test('creates components with functionally-defined classes', () => {
   assert.equal(b({ disabled: true }), 'a at b bt')
   assert.equal(b({ disabled: false }), 'a af b bf')
 })
+
+test('creates classes with just a string as input', () => {
+  const c = tarquin('a b')
+  assert.equal(c(), 'a b')
+})
+
+test('remove duplicate classes', () => {
+  const a = tarquin({ base: 'a', disabled: { true: 't a', false: 'a' } })
+  assert.equal(a({ disabled: false }), 'a')
+  assert.equal(a({ disabled: true }), 'a t')
+
+  const b = tarquin('a a')
+  assert.equal(b(), 'a')
+})

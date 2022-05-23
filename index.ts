@@ -14,8 +14,15 @@ export interface ClassModes {
 
 type FMode = (modes?: Modes) => string
 
-export const tarquin = (classModes: ClassModes) => (modes?: Modes) =>
-  getClasses(classModes, modes)
+export const tarquin =
+  (classModesOrString: ClassModes | string) => (modes?: Modes) => {
+    const classModes: ClassModes =
+      typeof classModesOrString == 'string'
+        ? { _: classModesOrString }
+        : classModesOrString
+
+    return getClasses(classModes, modes)
+  }
 
 function getClasses(classModes: ClassModes, modes: Modes) {
   const modeKeys = Object.keys(classModes)

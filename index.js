@@ -1,4 +1,9 @@
-export const tarquin = (classModes) => (modes) => getClasses(classModes, modes);
+export const tarquin = (classModesOrString) => (modes) => {
+    const classModes = typeof classModesOrString == 'string'
+        ? { _: classModesOrString }
+        : classModesOrString;
+    return getClasses(classModes, modes);
+};
 function getClasses(classModes, modes) {
     const modeKeys = Object.keys(classModes);
     let classes = new Set();
