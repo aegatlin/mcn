@@ -19,6 +19,9 @@ function getClasses(classModes, modes) {
                 break;
             }
             case 'object': {
+                const isRegistered = modes && Object.keys(modes).some(k => k == modeKey);
+                if (!isRegistered)
+                    throw Errors.Unregistered(modeKey);
                 const modality = modes[modeKey];
                 const modalityString = `${modality}`;
                 if (modalityString != 'undefined' && classMode[modalityString]) {
@@ -30,16 +33,6 @@ function getClasses(classModes, modes) {
                 throw new Error(`type of classMode: ${typeof classMode} not supported`);
             }
         }
-        if (typeof classMode == 'string') {
-            add(classes, classMode);
-        }
-        else {
-            const modality = modes[modeKey];
-            const modalityString = `${modality}`;
-            if (modalityString != 'undefined' && classMode[modalityString]) {
-                add(classes, classMode[modalityString]);
-            }
-        }
     });
     return Array.from(classes.values()).join(' ');
 }
@@ -49,3 +42,6 @@ function add(set, classes) {
         .map(c => c.trim())
         .forEach(c => set.add(c));
 }
+const Errors = {
+    Unregistered: (key) => new Error(`Registered mode not provided: ${key}`),
+};

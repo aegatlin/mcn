@@ -43,3 +43,49 @@ test('remove duplicate classes', () => {
   const b = tarquin('a a')
   assert.equal(b(), 'a')
 })
+
+test(
+  'throws error when registered mode is not provided',
+  { only: true },
+  () => {
+    const c = tarquin({
+      base: 'b',
+      disabled: {
+        true: 't',
+        false: 'f',
+      },
+    })
+
+    assert.throws(
+      () => {
+        c()
+      },
+      { message: 'Registered mode not provided: disabled' }
+    )
+  }
+)
+
+test(
+  'throws error when just one of many registered modes are not provided',
+  { only: true },
+  () => {
+    const c = tarquin({
+      base: 'b',
+      d: {
+        true: 't',
+        false: 'f',
+      },
+      missingMode: {
+        some: 's',
+        thing: 't',
+      },
+    })
+
+    assert.throws(
+      () => {
+        c({ d: true })
+      },
+      { message: 'Registered mode not provided: missingMode' }
+    )
+  }
+)

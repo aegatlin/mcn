@@ -10,6 +10,56 @@ import { tarquin } from 'tarquin'
 const c = tarquin({
   base: 'b1 b2',
   disabled: {
+    true: 't',
+    false: 'f',
+  },
+})
+
+c({ disabled: true }) // 'b1 b2 t'
+c({ disabled: false }) // 'b1 b2 f'
+c() // Error: Registered mode not provided: disabled
+```
+
+## Terminology
+
+In the example above, the modes are 'base', and 'disabled'. 'disabled' has two modalities, 'true' and 'false', while 'base' has a single modality, represented by a string.
+
+Each classnames group has an arbitrary number of modes with each mode having an arbitrary number of modalities.
+
+Modalities come in three types: objects, strings, and functions.
+
+## Examples
+
+Internally, tarquin passes your classes through a [Set](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set) to remove duplication. (That said, tarquin is **not** stateful. Instead of classes, tarquin uses lightweight curried functions.)
+
+```js
+const c = tarquin('simple classes no duplicates no no')
+c() // 'simple classes no duplicates'
+```
+
+Tarquin modes are arbitrary
+
+```js
+const c = tarquin({
+  base: 'b',
+  default: 'd',
+  madeUp: 'mu',
+  whatever: {
+    your: 'y',
+    heart: 'h',
+    desires: 'de',
+  },
+})
+
+c({ whatever: 'heart' }) // 'b d mu h'
+```
+
+Tarquin manages all the modalities of your classnames in a single place.
+
+```js
+const c = tarquin({
+  base: 'b',
+  disabled: {
     true: 'dt',
     false: 'df',
   },
@@ -24,64 +74,40 @@ const c = tarquin({
   },
 })
 
-const checkbox = document.getElementById('checkbox-id')
-checkbox.className = c({ disabled: true, checked: false, size: 'small' })
-// 'b1 b2 dt cf ss'
-checkbox.className = c({ disabled: false, checked: true, size: 'large' })
-// 'b1 b2 df ct sl'
+function component({disabled = false, checked = true, size = 'large}) {
+  return c({disabled, checked, size})
+}
+
+component() // 'b df ct sl'
+component({disabled: true, size: 'small'}) // 'b dt ct ss'
 ```
 
-## Terminology
+Tarquin also allows you to compose modalities easily by passing in a function mode. This will let you do things like define a multi-modal shadow behavior once, and use it in multiple places easily.
 
-Each class has an arbitrary number of modes, and each mode has an arbitrary number of modalities. In the example above, the mode 'checked' has two modalities: true and false. The mode 'size' has three modalities: small, medium, large. The mode 'base' has one modality, expressed as a string.
+```js
+const shadow = tarquin({
+  disabled: {
+    false: 'shadow-lg hover:shadow-xl',
+  },
+})
 
-## Parameterized Classes
-
-The ClassModes object will treat any top-level string as a base class, so you can pass in parameterized classes however you'd like.
-
-```ts
-const myComponent = (paramClasses = 'p', disabled = false) => {
+function component({ disabled = false }) {
   const c = tarquin({
-    paramClasses,
+    shadow,
     base: 'b',
     disabled: {
-      true: 't',
-      false: 'f',
+      true: 'dt',
+      false: 'df',
     },
   })
 
-  c({ disabled }) // with defaults: 'p b f'
+  return c({ disabled })
 }
+
+component() // 'shadow-lg hover:shadow-xl b df'
+component({ disabled: true }) // 'b dt'
 ```
 
-This behavior also allows for nested complexity
+## Experimental
 
-```ts
-const l1 = (disabled: boolean = false) => {
-  const c = tarquin({
-    base: 'b1',
-    disabled: {
-      true: 't',
-      false: 'f',
-    },
-  })
-
-  return l2(c({ disabled }))
-}
-
-const l2 = (additionalClasses: string, size: string = 'large') => {
-  const c = tarquin({
-    additionalClasses,
-    base: 'b2'
-    size: {
-      small: 's',
-      large: 'l',
-    },
-  })
-
-  return c({ size }) // with defaults: 'b1 f b2 l'
-}
-
-// A slightly different construction could've resulted in the following shape:
-// return c1({c2: c2({disabled}), size}) with the same results
-```
+This is currently an experimental project. The API is still in flux, and feedback is appreciated.

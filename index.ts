@@ -24,7 +24,7 @@ export const tarquin =
     return getClasses(classModes, modes)
   }
 
-function getClasses(classModes: ClassModes, modes: Modes) {
+function getClasses(classModes: ClassModes, modes?: Modes) {
   const modeKeys = Object.keys(classModes)
 
   let classes = new Set<string>()
@@ -41,6 +41,9 @@ function getClasses(classModes: ClassModes, modes: Modes) {
         break
       }
       case 'object': {
+        const isRegistered = modes && Object.keys(modes).some(k => k == modeKey)
+        if (!isRegistered) throw Errors.Unregistered(modeKey)
+
         const modality = modes[modeKey]
         const modalityString = `${modality}`
         if (modalityString != 'undefined' && classMode[modalityString]) {
@@ -50,16 +53,6 @@ function getClasses(classModes: ClassModes, modes: Modes) {
       }
       default: {
         throw new Error(`type of classMode: ${typeof classMode} not supported`)
-      }
-    }
-
-    if (typeof classMode == 'string') {
-      add(classes, classMode)
-    } else {
-      const modality = modes[modeKey]
-      const modalityString = `${modality}`
-      if (modalityString != 'undefined' && classMode[modalityString]) {
-        add(classes, classMode[modalityString])
       }
     }
   })
@@ -72,4 +65,9 @@ function add(set: Set<string>, classes: string) {
     .split(' ')
     .map(c => c.trim())
     .forEach(c => set.add(c))
+}
+
+const Errors = {
+  Unregistered: (key: string) =>
+    new Error(`Registered mode not provided: ${key}`),
 }
