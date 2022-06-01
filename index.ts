@@ -4,60 +4,54 @@ export interface Modes {
   [modeName: string]: Modality
 }
 
-interface ClassMode {
-  [modality: string]: string
-}
+type ClassMode =
+  | string
+  | { [modality: string]: string }
+  | ((modes: Modes) => string)
 
 export interface ClassModes {
-  [modeName: string]: ClassMode | string | FMode
+  [modeName: string]: ClassMode
 }
 
-type FMode = (modes?: Modes) => string
-
-export const tarquin =
-  (classModesOrString: ClassModes | string) => (modes?: Modes) => {
-    const classModes: ClassModes =
-      typeof classModesOrString == 'string'
-        ? { _: classModesOrString }
-        : classModesOrString
-
-    return getClasses(classModes, modes)
+export function tarquin(classes: ClassModes | string) {
+  return function (modes?: Modes): string {
+    const classModes = typeof classes == 'string' ? { _: classes } : classes
+    return getClassesFromModes(classModes, modes ?? {})
   }
+}
 
-function getClasses(classModes: ClassModes, modes?: Modes) {
-  const modeKeys = Object.keys(classModes)
-
+function getClassesFromModes(classModes: ClassModes, modes: Modes): string {
   let classes = new Set<string>()
-  modeKeys.forEach(modeKey => {
-    const classMode = classModes[modeKey]
 
-    switch (typeof classMode) {
-      case 'string': {
-        add(classes, classMode)
-        break
-      }
-      case 'function': {
-        add(classes, classMode(modes))
-        break
-      }
-      case 'object': {
-        const isRegistered = modes && Object.keys(modes).some(k => k == modeKey)
-        if (!isRegistered) throw Errors.Unregistered(modeKey)
-
-        const modality = modes[modeKey]
-        const modalityString = `${modality}`
-        if (modalityString != 'undefined' && classMode[modalityString]) {
-          add(classes, classMode[modalityString])
-        }
-        break
-      }
-      default: {
-        throw new Error(`type of classMode: ${typeof classMode} not supported`)
-      }
-    }
+  Object.keys(classModes).forEach(mode => {
+    const classMode = classModes[mode]
+    const classesToAdd = getClasses(classMode, mode, modes)
+    add(classes, classesToAdd)
   })
 
   return Array.from(classes.values()).join(' ')
+}
+
+function getClasses(classMode: ClassMode, mode: string, modes: Modes): string {
+  switch (typeof classMode) {
+    case 'string':
+      return classMode
+    case 'function':
+      return classMode(modes)
+    case 'object': {
+      const isRegistered = modes && Object.keys(modes).some(k => k == mode)
+      if (!isRegistered) throw Errors.Unregistered(mode)
+
+      const modality = modes[mode]
+      const modalityString = `${modality}`
+      if (modalityString != 'undefined' && classMode[modalityString]) {
+        return classMode[modalityString]
+      } else return ''
+    }
+    default: {
+      throw new Error(`type of classMode: ${typeof classMode} not supported`)
+    }
+  }
 }
 
 function add(set: Set<string>, classes: string) {

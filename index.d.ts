@@ -2,12 +2,11 @@ declare type Modality = any;
 export interface Modes {
     [modeName: string]: Modality;
 }
-interface ClassMode {
+declare type ClassMode = string | {
     [modality: string]: string;
-}
+} | ((modes: Modes) => string);
 export interface ClassModes {
-    [modeName: string]: ClassMode | string | FMode;
+    [modeName: string]: ClassMode;
 }
-declare type FMode = (modes?: Modes) => string;
-export declare const tarquin: (classModesOrString: ClassModes | string) => (modes?: Modes | undefined) => string;
+export declare function tarquin(classes: ClassModes | string): (modes?: Modes | undefined) => string;
 export {};
