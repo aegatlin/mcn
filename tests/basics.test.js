@@ -1,19 +1,19 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { tarquin } from '../index.js'
+import { scn } from '../index.js'
 
-test('creates classes from simple class-modes', () => {
-  const c = tarquin({ base: 'a b' })
+test('creates classes from a simple base', () => {
+  const c = scn({ base: 'a b' })
   assert.equal(c(), 'a b')
 })
 
 test('creates classes from multiple string-only class-modes', () => {
-  const c = tarquin({ base: 'a', default: 'b', anything: 'c' })
+  const c = scn({ base: 'a', default: 'b', anything: 'c' })
   assert.equal(c(), 'a b c')
 })
 
 test('creates components with exceedingly minimal styles', () => {
-  const c = tarquin({
+  const c = scn({
     disabled: {
       false: 'f',
     },
@@ -24,28 +24,28 @@ test('creates components with exceedingly minimal styles', () => {
 })
 
 test('creates components with functionally-defined classes', () => {
-  const a = tarquin({ default: 'a', disabled: { true: 'at', false: 'af' } })
-  const b = tarquin({ a, base: 'b', disabled: { true: 'bt', false: 'bf' } })
+  const a = scn({ default: 'a', disabled: { true: 'at', false: 'af' } })
+  const b = scn({ a, base: 'b', disabled: { true: 'bt', false: 'bf' } })
   assert.equal(b({ disabled: true }), 'a at b bt')
   assert.equal(b({ disabled: false }), 'a af b bf')
 })
 
 test('creates classes with just a string as input', () => {
-  const c = tarquin('a b')
+  const c = scn('a b')
   assert.equal(c(), 'a b')
 })
 
 test('remove duplicate classes', () => {
-  const a = tarquin({ base: 'a', disabled: { true: 't a', false: 'a' } })
+  const a = scn({ base: 'a', disabled: { true: 't a', false: 'a' } })
   assert.equal(a({ disabled: false }), 'a')
   assert.equal(a({ disabled: true }), 'a t')
 
-  const b = tarquin('a a')
+  const b = scn('a a')
   assert.equal(b(), 'a')
 })
 
 test('throws error when registered mode is not provided', () => {
-  const c = tarquin({
+  const c = scn({
     base: 'b',
     disabled: {
       true: 't',
@@ -59,10 +59,17 @@ test('throws error when registered mode is not provided', () => {
     },
     { message: 'Registered mode not provided: disabled' }
   )
+
+  assert.throws(
+    () => {
+      c({})
+    },
+    { message: 'Registered mode not provided: disabled' }
+  )
 })
 
 test('throws error when just one of many registered modes are not provided', () => {
-  const c = tarquin({
+  const c = scn({
     base: 'b',
     d: {
       true: 't',
@@ -80,4 +87,24 @@ test('throws error when just one of many registered modes are not provided', () 
     },
     { message: 'Registered mode not provided: missingMode' }
   )
+})
+
+test('combines "with" objects together', () => {
+  const withShadow = {
+    disabled: {
+      true: 'wsdt',
+      false: 'wsdf',
+    },
+  }
+
+  const c = scn(withShadow, {
+    base: 'b',
+    disabled: {
+      true: 'bdt',
+      false: 'bdf',
+    },
+  })
+
+  assert.equals(c({ disabled: true }), 'b bdt wsdt')
+  assert.equals(c({ disabled: false }), 'b bdf wsdf')
 })

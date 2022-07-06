@@ -1,99 +1,98 @@
-# Tarquin
+# SCN
 
-Tarquin is a multi-modal classnames management utility with a simple interface.
+SCN (Structured Class Names) is a multi-modal classnames management utility with a simple interface. Put simply: it helps you manage classnames.
 
-Put simply: it helps you manage classnames.
+```jsx
+import { scn } from 'scn'
 
-```js
-import { tarquin } from 'tarquin'
+const Component = ({ disabled }) => {
+  const c = scn({
+    base: 'b',
+    disabled: {
+      true: 't',
+      false: 'f',
+    },
+  })
 
-const c = tarquin({
-  base: 'b1 b2',
-  disabled: {
-    true: 't',
-    false: 'f',
-  },
-})
+  return <div className={c({ disabled })}>Hey</div>
+}
 
-c({ disabled: true }) // 'b1 b2 t'
-c({ disabled: false }) // 'b1 b2 f'
+c({ disabled: true }) // 'b t'
+c({ disabled: false }) // 'b f'
+c({}) // Error: Registered mode not provided: disabled
 c() // Error: Registered mode not provided: disabled
 ```
 
-## Terminology
+## Explanation
 
-In the example above, the modes are 'base', and 'disabled'. 'disabled' has two modalities, 'true' and 'false', while 'base' has a single modality, represented by a string.
-
-Each classnames group has an arbitrary number of modes with each mode having an arbitrary number of modalities.
-
-Modalities come in three types: objects, strings, and functions.
-
-## Examples
-
-Internally, tarquin passes your classes through a [Set](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set) to remove duplication. (That said, tarquin is **not** stateful. Instead of classes, tarquin uses lightweight curried functions.)
+A common practice in frontend development is using class names to style elements. Often those classes will be styled conditionally based on the state of the component that the element exists within, e.g., different classes are applied to a `div` element within a component based on whether or not the component is disabled. This can result in code that looks as follows:
 
 ```js
-const c = tarquin('simple classes no duplicates no no')
-c() // 'simple classes no duplicates'
+let classes = 'a b'
+classes += disabled ? ' d' : ' e'
 ```
 
-Tarquin modes are arbitrary
+While this might be manageable, I'd like to argue that it is not good code (though I've still written things like it countless times). As your component grows in complexity, it gets undeniably unwieldy. You are managing the conditional growth of a white-space sensitive string. The conditional growth is not inherently localized, and can occur anywhere in variable scope, leading to line drift. This makes it harder to read and reason about, and manipulate further.
 
-```js
-const c = tarquin({
-  base: 'b',
-  default: 'd',
-  madeUp: 'mu',
-  whatever: {
-    your: 'y',
-    heart: 'h',
-    desires: 'de',
-  },
-})
+SCN aims to solve the above problems by representing class names within the inherent modal structures of your component. You provide an object representing your component's modes, with each mode defining its modalities and classes, to `scn`. The returned function then will construct your classes string, provided an object of each mode and its particular modality.
 
-c({ whatever: 'heart' }) // 'b d mu h'
+```jsx
+const Component = ({ disabled, checked, size }) => {
+  const c = scn({
+    base: 'b',
+    disabled: {
+      true: 'dt',
+      false: 'df',
+    },
+    checked: {
+      true: 'ct',
+    },
+    size: {
+      [Size.Large]: 'sl',
+      [Size.Medium]: 'sm',
+      [Size.Small]: 'ss',
+    },
+  })
+
+  return <div className={c({ disabled, checked, someThreeAry })}>hey</div>
+}
 ```
 
-Tarquin manages all the modalities of your classnames in a single place.
+## How-To
 
-```js
-const c = tarquin({
-  base: 'b',
+### Add simple classes
+
+```jsx
+const c = scn({ base: 'simple classes' })
+c() // 'simple classes'
+```
+
+### Add modal classes
+
+```jsx
+const c = scn({ base: 'a', disabled: { true: 'b', false: 'c' } })
+c({ disabled: false }) // 'a c'
+```
+
+### Add modes ahead of time
+
+```jsx
+const withShadow = {
   disabled: {
-    true: 'dt',
-    false: 'df',
+    true: 'no shadow',
+    false: 'some shadow',
   },
-  checked: {
-    true: 'ct',
-    false: 'cf',
-  },
-  size: {
-    small: 'ss',
-    medium: 'sm',
-    large: 'sl',
-  },
-})
-
-function component({disabled = false, checked = true, size = 'large}) {
-  return c({disabled, checked, size})
 }
 
-component() // 'b df ct sl'
-component({disabled: true, size: 'small'}) // 'b dt ct ss'
-```
-
-Tarquin also allows you to compose modalities easily by passing in a function mode. This will let you do things like define a multi-modal shadow behavior once, and use it in multiple places easily.
-
-```js
-const shadow = tarquin({
+const withHover = {
   disabled: {
-    false: 'shadow-lg hover:shadow-xl',
+    true: 'no hover',
+    false: 'some hover',
   },
-})
+}
 
-function component({ disabled = false }) {
-  const c = tarquin({
-    shadow,
+const Component = ({ disabled }) => {
+  const c = scn(withShadow, withHover, {
     base: 'b',
     disabled: {
       true: 'dt',
@@ -101,13 +100,43 @@ function component({ disabled = false }) {
     },
   })
 
-  return c({ disabled })
+  return <div className={c({ disabled })}>hey</div>
 }
-
-component() // 'shadow-lg hover:shadow-xl b df'
-component({ disabled: true }) // 'b dt'
 ```
 
-## Experimental
+### Add modal classes to a complex component
 
-This is currently an experimental project. The API is still in flux, and feedback is appreciated.
+```jsx
+const Component = ({ disabled }) => {
+  const parent = scn({ base: 'pb', disabled: { true: 'pdt', false: 'pdf' } })
+  const childOne = scn({
+    base: 'c1b',
+    disabled: { true: 'c1dt', false: 'c1df' },
+  })
+  const childTwo = scn({
+    base: 'c2b',
+    disabled: { true: 'c2dt', false: 'c2df' },
+  })
+
+  return (
+    <div className={parent({ disabled })}>
+      <div className={childOne({ disabled })}></div>
+      <div className={childTwo({ disabled })}></div>
+    </div>
+  )
+}
+```
+
+### Keep code easy to read
+
+Note that the initial structure is wholistic. Apart from `base`, all modes and modalities are arbitrary. You do not need to define your classes inside your component. You only need to run the final classes-generating function inside your component.
+
+```jsx
+const c = scn({ base: 'b', disabled: { true: 'dt', false: 'df' } })
+
+const Component = ({ disabled }) => {
+  return <div className={c({ disabled })}></div>
+}
+```
+
+This creates a nice separation of concerns. When you want to think about styles wholistically, you can go to that part of the file, while the logic and structure stay nice and tidy within the component. Be aware, however, that your wholistic class structure is necessarily **coupled** to the structure of your component, so don't separate them too far apart. SCN's are per element, not per component. Changing the structure of your component means CRUD'ing elements, which means CRUD'ing your SCNs.
