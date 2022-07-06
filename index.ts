@@ -13,7 +13,7 @@ export interface ClassModes {
   [modeName: string]: ClassMode
 }
 
-export function scn(classes: ClassModes | string) {
+export function mcn(classes: ClassModes | string) {
   return function (modes?: Modes): string {
     const classModes = typeof classes == 'string' ? { _: classes } : classes
     return getClassesFromModes(classModes, modes ?? {})

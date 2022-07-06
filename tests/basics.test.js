@@ -1,19 +1,20 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { scn } from '../index.js'
+import { mcn } from '../index.js'
 
 test('creates classes from a simple base', () => {
-  const c = scn({ base: 'a b' })
+  const c = mcn({ base: 'a b' })
   assert.equal(c(), 'a b')
+  assert.equal(c({}), 'a b')
 })
 
 test('creates classes from multiple string-only class-modes', () => {
-  const c = scn({ base: 'a', default: 'b', anything: 'c' })
+  const c = mcn({ base: 'a', default: 'b', anything: 'c' })
   assert.equal(c(), 'a b c')
 })
 
 test('creates components with exceedingly minimal styles', () => {
-  const c = scn({
+  const c = mcn({
     disabled: {
       false: 'f',
     },
@@ -23,29 +24,29 @@ test('creates components with exceedingly minimal styles', () => {
   assert.equal(c({ disabled: true }), '')
 })
 
-test('creates components with functionally-defined classes', () => {
-  const a = scn({ default: 'a', disabled: { true: 'at', false: 'af' } })
-  const b = scn({ a, base: 'b', disabled: { true: 'bt', false: 'bf' } })
-  assert.equal(b({ disabled: true }), 'a at b bt')
-  assert.equal(b({ disabled: false }), 'a af b bf')
-})
+// test('creates components with functionally-defined classes', () => {
+//   const a = scn({ default: 'a', disabled: { true: 'at', false: 'af' } })
+//   const b = scn({ a, base: 'b', disabled: { true: 'bt', false: 'bf' } })
+//   assert.equal(b({ disabled: true }), 'a at b bt')
+//   assert.equal(b({ disabled: false }), 'a af b bf')
+// })
 
-test('creates classes with just a string as input', () => {
-  const c = scn('a b')
-  assert.equal(c(), 'a b')
-})
+// test('creates classes with just a string as input', () => {
+//   const c = scn('a b')
+//   assert.equal(c(), 'a b')
+// })
 
 test('remove duplicate classes', () => {
-  const a = scn({ base: 'a', disabled: { true: 't a', false: 'a' } })
+  const a = mcn({ base: 'a', disabled: { true: 't a', false: 'a' } })
   assert.equal(a({ disabled: false }), 'a')
   assert.equal(a({ disabled: true }), 'a t')
 
-  const b = scn('a a')
+  const b = mcn('a a')
   assert.equal(b(), 'a')
 })
 
 test('throws error when registered mode is not provided', () => {
-  const c = scn({
+  const c = mcn({
     base: 'b',
     disabled: {
       true: 't',
@@ -69,7 +70,7 @@ test('throws error when registered mode is not provided', () => {
 })
 
 test('throws error when just one of many registered modes are not provided', () => {
-  const c = scn({
+  const c = mcn({
     base: 'b',
     d: {
       true: 't',
@@ -89,22 +90,22 @@ test('throws error when just one of many registered modes are not provided', () 
   )
 })
 
-test('combines "with" objects together', () => {
-  const withShadow = {
-    disabled: {
-      true: 'wsdt',
-      false: 'wsdf',
-    },
-  }
+// test('combines "with" objects together', () => {
+//   const withShadow = {
+//     disabled: {
+//       true: 'wsdt',
+//       false: 'wsdf',
+//     },
+//   }
 
-  const c = scn(withShadow, {
-    base: 'b',
-    disabled: {
-      true: 'bdt',
-      false: 'bdf',
-    },
-  })
+//   const c = scn(withShadow, {
+//     base: 'b',
+//     disabled: {
+//       true: 'bdt',
+//       false: 'bdf',
+//     },
+//   })
 
-  assert.equals(c({ disabled: true }), 'b bdt wsdt')
-  assert.equals(c({ disabled: false }), 'b bdf wsdf')
-})
+//   assert.equals(c({ disabled: true }), 'b bdt wsdt')
+//   assert.equals(c({ disabled: false }), 'b bdf wsdf')
+// })

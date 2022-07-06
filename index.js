@@ -1,4 +1,4 @@
-export function scn(classes) {
+export function mcn(classes) {
     return function (modes) {
         const classModes = typeof classes == 'string' ? { _: classes } : classes;
         return getClassesFromModes(classModes, modes ?? {});

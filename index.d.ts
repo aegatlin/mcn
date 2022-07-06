@@ -8,5 +8,5 @@ declare type ClassMode = string | {
 export interface ClassModes {
     [modeName: string]: ClassMode;
 }
-export declare function scn(classes: ClassModes | string): (modes?: Modes | undefined) => string;
+export declare function mcn(classes: ClassModes | string): (modes?: Modes | undefined) => string;
 export {};

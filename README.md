@@ -1,142 +1,99 @@
-# SCN
+# mcn
 
-SCN (Structured Class Names) is a multi-modal classnames management utility with a simple interface. Put simply: it helps you manage classnames.
+mcn (modal class names) helps you manage classnames.
 
-```jsx
-import { scn } from 'scn'
+## How To
 
-const Component = ({ disabled }) => {
-  const c = scn({
-    base: 'b',
-    disabled: {
-      true: 't',
-      false: 'f',
-    },
-  })
+### Get Started
 
-  return <div className={c({ disabled })}>Hey</div>
-}
-
-c({ disabled: true }) // 'b t'
-c({ disabled: false }) // 'b f'
-c({}) // Error: Registered mode not provided: disabled
-c() // Error: Registered mode not provided: disabled
+```sh
+npm i mcn
 ```
-
-## Explanation
-
-A common practice in frontend development is using class names to style elements. Often those classes will be styled conditionally based on the state of the component that the element exists within, e.g., different classes are applied to a `div` element within a component based on whether or not the component is disabled. This can result in code that looks as follows:
 
 ```js
-let classes = 'a b'
-classes += disabled ? ' d' : ' e'
+const classes = mcn({
+  base: 'border',
+  disabled: {
+    false: 'border-blue-500',
+    true: 'border-grey-500',
+  },
+})
+
+classes({ disabled: false }) // 'border border-blue-500'
+classes({ disabled: true }) // 'border border-grey-500'
+classes({}) // Error: Registered mode not provided: disabled
 ```
-
-While this might be manageable, I'd like to argue that it is not good code (though I've still written things like it countless times). As your component grows in complexity, it gets undeniably unwieldy. You are managing the conditional growth of a white-space sensitive string. The conditional growth is not inherently localized, and can occur anywhere in variable scope, leading to line drift. This makes it harder to read and reason about, and manipulate further.
-
-SCN aims to solve the above problems by representing class names within the inherent modal structures of your component. You provide an object representing your component's modes, with each mode defining its modalities and classes, to `scn`. The returned function then will construct your classes string, provided an object of each mode and its particular modality.
-
-```jsx
-const Component = ({ disabled, checked, size }) => {
-  const c = scn({
-    base: 'b',
-    disabled: {
-      true: 'dt',
-      false: 'df',
-    },
-    checked: {
-      true: 'ct',
-    },
-    size: {
-      [Size.Large]: 'sl',
-      [Size.Medium]: 'sm',
-      [Size.Small]: 'ss',
-    },
-  })
-
-  return <div className={c({ disabled, checked, someThreeAry })}>hey</div>
-}
-```
-
-## How-To
 
 ### Add simple classes
 
 ```jsx
-const c = scn({ base: 'simple classes' })
+const c = mcn({ base: 'simple classes' })
 c() // 'simple classes'
+c({}) // 'simple classes'
 ```
 
 ### Add modal classes
 
 ```jsx
-const c = scn({ base: 'a', disabled: { true: 'b', false: 'c' } })
+const c = mcn({ base: 'a', disabled: { true: 'b', false: 'c' } })
 c({ disabled: false }) // 'a c'
 ```
 
-### Add modes ahead of time
+## Explanation
 
-```jsx
-const withShadow = {
-  disabled: {
-    true: 'no shadow',
-    false: 'some shadow',
-  },
+Components consist of elements. The styles those elements have are dependent on the modalities of the component. For example, if a form field is invalid, a developer might want the label element text and the input element border to turn red, while if the component is disabled, they should both be grey, and otherwise black. Such a requirement can result in code that looks as follows:
+
+```js
+let label = 'font-xl'
+let input = 'border'
+
+// Using if-clauses
+if (disabled) {
+  label += ' font-grey'
+  input += ' border-grey'
+} else {
+  label += ' font-black'
+  input += ' border-black'
 }
 
-const withHover = {
-  disabled: {
-    true: 'no hover',
-    false: 'some hover',
-  },
-}
-
-const Component = ({ disabled }) => {
-  const c = scn(withShadow, withHover, {
-    base: 'b',
-    disabled: {
-      true: 'dt',
-      false: 'df',
-    },
-  })
-
-  return <div className={c({ disabled })}>hey</div>
-}
+// Using ternaries
+label += invalid ? ' font-red' : ' font-black'
+input += invalid ? ' border-red' : ' border-black'
 ```
 
-### Add modal classes to a complex component
+There are some problems with the above code: If you don't add whitespace the styles won't apply. You apply styles multiple times (and it's probably not worth the hassle of removing them). The places where you manipulate the string sprawls across multiple lines and leads to code drift, decentralizing the style manipulation and making the component harder to understand and reason about. The output string is essentially independent of the internal structure and functionality of the component, yet lives within it, increasing its size and decreasing its legibility.
+
+`mcn` aims to solve these problems by centralizing the definitions of styles, and representing them in a way that respects the modalities of the component, and how they affect each element within.
 
 ```jsx
-const Component = ({ disabled }) => {
-  const parent = scn({ base: 'pb', disabled: { true: 'pdt', false: 'pdf' } })
-  const childOne = scn({
-    base: 'c1b',
-    disabled: { true: 'c1dt', false: 'c1df' },
-  })
-  const childTwo = scn({
-    base: 'c2b',
-    disabled: { true: 'c2dt', false: 'c2df' },
-  })
+const classes = {
+  parent: 'a b c',
+  childOne: mcn({
+    base: 'a b c',
+    disabled: {
+      false: 'f',
+    },
+  }),
+  childTwo: mcn({
+    base: 'd e f',
+    disabled: {
+      true: 't',
+      false: 'f',
+    },
+    state: {
+      [State.One]: 'one',
+      [State.Two]: 'two',
+      [State.Three]: 'three',
+    },
+  }),
+}
 
+const Component = ({ disabled, state }) => {
   return (
-    <div className={parent({ disabled })}>
-      <div className={childOne({ disabled })}></div>
-      <div className={childTwo({ disabled })}></div>
+    <div className={classes.parent}>
+      <div className={classes.childOne({ disabled })}>child one</div>
+      <div className={classes.childTwo({ disabled, state })}>child two</div>
     </div>
   )
 }
 ```
-
-### Keep code easy to read
-
-Note that the initial structure is wholistic. Apart from `base`, all modes and modalities are arbitrary. You do not need to define your classes inside your component. You only need to run the final classes-generating function inside your component.
-
-```jsx
-const c = scn({ base: 'b', disabled: { true: 'dt', false: 'df' } })
-
-const Component = ({ disabled }) => {
-  return <div className={c({ disabled })}></div>
-}
-```
-
-This creates a nice separation of concerns. When you want to think about styles wholistically, you can go to that part of the file, while the logic and structure stay nice and tidy within the component. Be aware, however, that your wholistic class structure is necessarily **coupled** to the structure of your component, so don't separate them too far apart. SCN's are per element, not per component. Changing the structure of your component means CRUD'ing elements, which means CRUD'ing your SCNs.
